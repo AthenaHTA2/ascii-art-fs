@@ -1,0 +1,114 @@
+/*Instructions
+    Your project must be written in Go.
+    The code must respect the good practices.
+    It is recommended to have test files for unit testing.
+    You can see all about the banners here.
+    The usage must respect this format go run . [STRING] [BANNER], any other formats must return the following usage message:
+Usage: go run . [STRING] [BANNER]
+EX: go run . something standard
+Usage
+$ go run . "hello" standard | cat -e
+ _              _   _          $
+| |            | | | |         $
+| |__     ___  | | | |   ___   $
+|  _ \   / _ \ | | | |  / _ \  $
+| | | | |  __/ | | | | | (_) | $
+|_| |_|  \___| |_| |_|  \___/  $
+                               $
+                               $
+$ go run . "Hello There!" shadow | cat -e
+                                                                                      $
+_|    _|          _| _|                _|_|_|_|_| _|                                  $
+_|    _|   _|_|   _| _|   _|_|             _|     _|_|_|     _|_|   _|  _|_|   _|_|   $
+_|_|_|_| _|_|_|_| _| _| _|    _|           _|     _|    _| _|_|_|_| _|_|     _|_|_|_| $
+_|    _| _|       _| _| _|    _|           _|     _|    _| _|       _|       _|       $
+_|    _|   _|_|_| _| _|   _|_|             _|     _|    _|   _|_|_| _|         _|_|_| $
+                                                                                      $
+                                                                                      $
+$ go run . "Hello There!" thinkertoy | cat -e
+                                              $
+o  o     o o           o-O-o o                $
+|  |     | |             |   |                $
+O--O o-o | | o-o         |   O--o o-o o-o o-o $
+|  | |-' | | | |         |   |  | |-' |   |-' $
+o  o o-o o o o-o         o   o  o o-o o   o-o $
+                                              $
+                                              $
+Code: */
+
+package main
+
+import (
+	"fmt"
+	"os"
+	"strings"
+)
+
+var (
+	Banner           string
+	Alignment        string
+	templateTerminal string
+	ToConvert        string
+)
+
+func main() {
+	n := len(os.Args)
+	numArgs(n) // calling formula 'numArgs' to check that terminal has exactly three arguments.
+	templateTerminal = os.Args[2]
+	checkTemplate(templateTerminal) // calling formula 'checkTemplate'. Correct templates are either standard, or shadow, or thinkertoy.
+	Banner = templateTerminal + ".txt"
+	data, _ := os.ReadFile(Banner) // take data from Banner onto data
+	ToConvert = os.Args[1]
+	words := strings.Split(ToConvert, "\\n")
+	lines := strings.Split(string(data), "\n")
+
+	for index := range words {
+		if words[index] == "" { // break if there is no word
+			break
+		}
+		letters := strings.Split(words[index], "") // slice the words into symbols
+		var ascii []int
+		for i := range letters {
+			l := int([]rune(letters[i])[0]) // store the rune value of the letter in l
+			ascii = append(ascii, l)        // append l value to ascii untill all letters are appended
+		}
+		for j := 1; j < 9; j++ { // loop 8 times because a row is 8 lines long
+			str := ""
+			for k := range ascii { // loop through all runes in ascii
+				line := (ascii[k] - 32) * 9 // this finds the row before the ascii symbol in the txt file
+				str += lines[line+j]        // gives the string all the lines into the string
+				// in terminal, the 'stty size' command returns current screen size, e.g. rows 25; columns 98; command stty -a shows all stats.
+				// E.g.: fmt.Printf("%100s\n",str) this aligns to right
+				// E.g.: fmt.Printf("%-100s\n",str) this aligns to left
+			}
+			fmt.Println(str) // print across the length of the terminal
+		}
+	}
+}
+
+func numArgs(n int) {
+	if n != 3 {
+		fmt.Println("Usage: go run . [STRING] [BANNER]")
+		fmt.Println()
+		fmt.Println("EX: go run . something standard")
+		os.Exit(0)
+	}
+}
+
+func checkTemplate(templateTerminal string) {
+	ToConvert = os.Args[1]
+	if templateTerminal != "standard" && templateTerminal != "shadow" && templateTerminal != "thinkertoy" {
+		if os.Args[1] != "" {
+			fmt.Println("Usage: go run . [STRING] [BANNER]")
+			fmt.Println()
+			fmt.Printf("EX: go run . %s standard\n", ToConvert)
+
+		} else {
+			fmt.Println("Usage: go run . [STRING] [BANNER]")
+			fmt.Println()
+			fmt.Print("EX: go run . something standard zero string\n")
+		}
+		os.Exit(0)
+	}
+}
+
